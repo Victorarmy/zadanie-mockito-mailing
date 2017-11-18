@@ -105,7 +105,7 @@ public class NotifierSenderTest {
         signups.add(appropriateSignup);
 
         notifierSender.prepareAndSendMails();
-        verify(messageProvider, atLeastOnce()).prepareMessage(ArgumentMatchers.isA(User.class), any(), any(), any());
+        verify(messageProvider, times(1)).prepareMessage(ArgumentMatchers.isA(User.class), any(), any(), any());
     }
 
     @Test
@@ -123,19 +123,31 @@ public class NotifierSenderTest {
         Signup appropriateSignupOne = new Signup("Jan", "Kurs Spring", LocalDate.of(2017, 8, 10),
                 LocalDate.of(2017, 10, 11));
         Signup appropriateSignupTwo = new Signup("Marian", "Java Podstawy", LocalDate.of(2017, 8, 10),
+                LocalDate.of(2017, 10, 17));
+        Signup appropriateSignupThree = new Signup("Piotr", "Java Podstawy", LocalDate.of(2017, 8, 10),
                 LocalDate.of(2017, 11, 10));
+        Signup appropriateSignupFour = new Signup("Jane", "Java Podstawy", LocalDate.of(2017, 8, 10),
+                LocalDate.of(2018, 1, 10));
         Signup inappropriateSignup = new Signup("Kamil", "Kurs Spring", LocalDate.of(2017, 8, 10),
                 LocalDate.of(2017, 12, 11));
 
+        User userOne = new User("Piotr", "Piotr@wp.pl");
+        User userTwo = new User("Jane", "Jane@gmail.com");
+
+        users.add(userOne);
+        users.add(userTwo);
         signups.add(appropriateSignupOne);
         signups.add(appropriateSignupTwo);
+        signups.add(appropriateSignupThree);
+        signups.add(appropriateSignupFour);
         signups.add(inappropriateSignup);
 
         notifierSender.prepareAndSendMails();
 
         ArgumentCaptor<String> emailCaptor = ArgumentCaptor.forClass(String.class);
-        verify(mailSystem, times(2)).sendEmail(emailCaptor.capture(), anyString(), anyString());
-        assertThat(emailCaptor.getAllValues(), hasItems("Jan@gmail.com", "Marian@gmail.com"));
+        verify(mailSystem, times(4)).sendEmail(emailCaptor.capture(), anyString(), anyString());
+        assertThat(emailCaptor.getAllValues().size(), is(4));
+        assertThat(emailCaptor.getAllValues(), hasItems("Jan@gmail.com", "Marian@gmail.com", "Piotr@wp.pl","Jane@gmail.com"));
         assertThat(emailCaptor.getAllValues(), not(hasItems("Kamil@onet.pl")));
     }
 
